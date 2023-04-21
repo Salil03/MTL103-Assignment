@@ -24,7 +24,6 @@ def simplex(A,b,c,n,m,t):
     c.append(-cost)
     c.append(0)
     A.append(c)
-    print(A)
   #tableau is already fromed no need for re formation
   #iteration starts
   flag=True
@@ -32,7 +31,9 @@ def simplex(A,b,c,n,m,t):
     ctr=0
     for i in range(m):
       if A[n][i]<0:
-        Simp_iteration(A)
+        chk=Simp_iteration(A,i,n,m)
+        if not(chk):
+          return "-inf"
         ctr=1
         break
     if ctr==0:
@@ -42,12 +43,31 @@ def simplex(A,b,c,n,m,t):
 def dual_simplex(A,b,c,n,m):
   return A
 
-def Simp_iteration(A):
-  pass
+def Simp_iteration(A,i,n,m):
+  l=[]
+  for j in range(n):
+    if A[j][i]>0:
+      l.append((A[j][m]/A[j][i],j))
+  if len(l)==0:
+    return False
+  t=min(l)[1]
+  dum=A[t][i]
+  for k in range(m+1):
+    A[t][k]=A[t][k]/dum
+  for j in range(n+1):
+    if j!=t:
+      dum2=A[j][i]
+      for k in range(m+1):
+        A[j][k]=A[j][k]-dum2*A[t][k]
+  A[t][m+1]=i
+  return True
+
+
+
 
 #test case
-A=[[1,2,3],[2,3,4],[5,6,7]]
+A=[[1,2,3],[2,3,4],[5,6,8]]
 n,m=3,3
 b=[1,2,3]
 c=[-1,-1,1]
-simplex(A,b,c,n,m,0)
+print(simplex(A,b,c,n,m,0))
