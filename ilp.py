@@ -6,7 +6,7 @@ def gomory(filename):
   A = [[int(x) for x in f.readline().strip().split(' ')] for i in range(m)]
   f.close()
   tableau = tableau_setup(A, b,c,n, m)
-  fractional_dual_simplex(tableau)
+  fractional_dual_simplex(tableau, n)
   x = [0 for x in range(n)]
   for row in tableau:
     if row[0][0] >= 1 and row[0][0] <= n:
@@ -28,31 +28,30 @@ def check_integer(num):
   return (frac(num) == 0)
 
 def generate_cut(tableau, cut_row, n, m):
-  tableau[cut_row][0][1] = round_off(tableau[cut_row][0][1])
-  for column in range(1, n+1):
-    tableau[cut_row][column] = round_off(tableau[cut_row][column])
   for row in range(0, m+1):
     tableau[row].append(0)
   new_row = []
+  tableau[cut_row][0][1] = round_off(tableau[cut_row][0][1])
   new_row.append([n+1, -frac(tableau[cut_row][0][1])])
   for column in range(1, n+1):
+    tableau[cut_row][column] = round_off(tableau[cut_row][column])
     new_row.append(-frac(tableau[cut_row][column]))
   new_row.append(1)
   tableau.append(new_row)
   return None
 
-def fractional_dual_simplex(tableau):
+def fractional_dual_simplex(tableau, variables):
   m = len(tableau)-1
   n = len(tableau[0])-1
   primal_simplex(tableau, n,m)
   integer = False
   while not integer:
     integer = True
+    tableau[0][0][1] = round_off(tableau[0][0][1])
     for row in range(1, m+1):
       tableau[row][0][1] = round_off(tableau[row][0][1])
-      if not check_integer(tableau[row][0][1]):
+      if tableau[row][0][0] <= variables and not check_integer(tableau[row][0][1]):
         integer = False
-        tableau[0][0][1] = round_off(tableau[0][0][1])
         if not check_integer(tableau[0][0][0]):
           generate_cut(tableau, 0, n, m)
         else:
@@ -162,4 +161,4 @@ def simplex_pivot(tableau, pivot_row, pivot_column, n, m):
 
 # print(dual_simplex(A, 6, 4))
 
-print(gomory("input.txt"))
+print(gomory("input3.txt"))
