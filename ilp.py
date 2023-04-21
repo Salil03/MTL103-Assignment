@@ -6,7 +6,6 @@ def simplex(A,b,c,n,m,t):
   if t==0:
     #if tableau is not formed and we need to construct again
     #row n+1 will have reduced costs and negative of final costs, column m+n+1 will have B-1b and column m+n+2 will have the index of variable being used in the basis which starts from 0
-    tableau=A
     for i in range(len(A)):
       for j in range(len(A)):
         if i==j:
