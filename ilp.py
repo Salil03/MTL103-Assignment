@@ -59,6 +59,7 @@ def fractional_dual_simplex(tableau, variables):
         n += 1
         m +=1
         dual_simplex(tableau, n, m)
+        print(tableau)
         break
   return tableau
 
@@ -75,7 +76,7 @@ def tableau_setup(A, b, c, n, m):
   tableau_row = [[0,0]]
   for column in range(n):
     tableau_row.append(c[column])
-  for column in range(n):
+  for column in range(m):
     tableau_row.append(0)
   tableau.append(tableau_row)
   for row in range(1, m+1):
@@ -83,7 +84,7 @@ def tableau_setup(A, b, c, n, m):
     tableau_row.append([row+n, b[row-1]])
     for column in range(n):
       tableau_row.append(A[row-1][column])
-    for column in range(1, n+1):
+    for column in range(1, m+1):
       if column == row:
         tableau_row.append(1)
       else:
@@ -161,4 +162,4 @@ def simplex_pivot(tableau, pivot_row, pivot_column, n, m):
 
 # print(dual_simplex(A, 6, 4))
 
-print(gomory("input3.txt"))
+print(gomory("input2.txt"))
