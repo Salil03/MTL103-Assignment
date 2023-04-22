@@ -52,14 +52,13 @@ def fractional_dual_simplex(tableau, variables):
       tableau[row][0][1] = round_off(tableau[row][0][1])
       if tableau[row][0][0] <= variables and not check_integer(tableau[row][0][1]):
         integer = False
-        if not check_integer(tableau[0][0][0]):
+        if not check_integer(tableau[0][0][1]):
           generate_cut(tableau, 0, n, m)
         else:
           generate_cut(tableau, row, n, m)
         n += 1
         m +=1
         dual_simplex(tableau, n, m)
-        print(tableau)
         break
   return tableau
 
@@ -162,4 +161,4 @@ def simplex_pivot(tableau, pivot_row, pivot_column, n, m):
 
 # print(dual_simplex(A, 6, 4))
 
-print(gomory("input2.txt"))
+print(gomory("input3.txt"))
