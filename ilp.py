@@ -7,13 +7,13 @@ def gomory(filename):
   f.close()
   tableau = tableau_setup(A, b,c,n, m)
   auxillary_simplex(tableau, n+2*m, m)
-  return tableau
-  # fractional_dual_simplex(tableau, n)
-  # x = [0 for x in range(n)]
-  # for row in tableau:
-  #   if row[0][0] >= 1 and row[0][0] <= n:
-  #     x[row[0][0]-1] = row[0][1]
-  # return x 
+  tableau_switch(tableau, n, m)
+  fractional_dual_simplex(tableau, n)
+  x = [0 for x in range(n)]
+  for row in tableau:
+    if row[0][0] >= 1 and row[0][0] <= n:
+      x[row[0][0]-1] = row[0][1]
+  return x
 
 def round_off(num):
   if abs(num - round(num)) < 0.0000000001:
@@ -64,6 +64,12 @@ def fractional_dual_simplex(tableau, variables):
         break
   return tableau
 
+
+def tableau_switch(tableau, n, m):
+  tableau.pop(1)
+  for row in range(m+1):
+    del tableau[row][1:m+1]
+  return tableau
 
 def tableau_setup(A, b, c, n, m):
   reversed = [1 for x in range(m)]
@@ -236,4 +242,4 @@ def simplex_pivot(tableau, pivot_row, pivot_column, n, m):
 
 # print(dual_simplex(A, 6, 4))
 
-print(gomory("input_test.txt"))
+print(gomory("input3.txt"))
