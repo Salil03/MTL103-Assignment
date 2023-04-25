@@ -6,12 +6,14 @@ def gomory(filename):
   A = [[int(x) for x in f.readline().strip().split(' ')] for i in range(m)]
   f.close()
   tableau = tableau_setup(A, b,c,n, m)
-  fractional_dual_simplex(tableau, n)
-  x = [0 for x in range(n)]
-  for row in tableau:
-    if row[0][0] >= 1 and row[0][0] <= n:
-      x[row[0][0]-1] = row[0][1]
-  return x 
+  auxillary_simplex(tableau, n+2*m, m)
+  return tableau
+  # fractional_dual_simplex(tableau, n)
+  # x = [0 for x in range(n)]
+  # for row in tableau:
+  #   if row[0][0] >= 1 and row[0][0] <= n:
+  #     x[row[0][0]-1] = row[0][1]
+  # return x 
 
 def round_off(num):
   if abs(num - round(num)) < 0.0000000001:
@@ -63,33 +65,106 @@ def fractional_dual_simplex(tableau, variables):
   return tableau
 
 
-
-
 def tableau_setup(A, b, c, n, m):
+  reversed = [1 for x in range(m)]
   for row in range(m):
     if b[row] < 0:
       b[row] *= -1
+      reversed[row] = -1
       for column in range(n):
         A[row][column] *= -1
   tableau = []
-  tableau_row = [[0,0]]
-  for column in range(n):
-    tableau_row.append(c[column])
+  cost_row = [[0,0]]
   for column in range(m):
-    tableau_row.append(0)
-  tableau.append(tableau_row)
+    cost_row.append(0)
+  for column in range(n):
+    cost_row.append(c[column])
+  for column in range(m):
+    cost_row.append(0)
+  tableau.append(cost_row)
+  auxillary_row = [[0, 0]]
+  for column in range(m):
+    auxillary_row.append(1)
+  for column in range(n+m):
+    auxillary_row.append(0)
+  tableau.append(auxillary_row)
   for row in range(1, m+1):
     tableau_row = []
-    tableau_row.append([row+n, b[row-1]])
-    for column in range(n):
-      tableau_row.append(A[row-1][column])
+    tableau_row.append([-row, b[row-1]])
     for column in range(1, m+1):
       if column == row:
         tableau_row.append(1)
       else:
         tableau_row.append(0)
+    for column in range(n):
+      tableau_row.append(A[row-1][column])
+    for column in range(1, m+1):
+      if column == row:
+        tableau_row.append(1 * reversed[column-1])
+      else:
+        tableau_row.append(0)
     tableau.append(tableau_row)
+  for row in range(2, m+2):
+    tableau[1][0][1]-= tableau[row][0][1]
+    for column in range(1, n+2*m+1):
+      tableau[1][column] -= tableau[row][column]
   return tableau
+
+def auxillary_simplex(tableau, n, m):
+  optimal = False
+  while not optimal:
+    optimal = True
+    for column in range(1, n+1):
+      tableau[1][column] = round_off(tableau[1][column])
+      if tableau[1][column] < 0:
+        optimal = False
+        auxillary_simplex_iteration(tableau, n, m, column)
+        break
+  artificial = True
+  while artificial:
+    artificial = False
+    for row in range(2, m+2):
+      if tableau[row][0][0] < 0:
+        artificial = True
+        assert(tableau[row][0][1] == 0)
+        for column in range(1, n):
+          tableau[row][column] = round_off(tableau[row][column])
+          if tableau[row][column] !=0:
+            auxillary_pivot(tableau, row, column, n, m)
+            break
+        break
+  return tableau
+
+def auxillary_simplex_iteration(tableau, n, m, pivot_column):
+  minimum = -1
+  pivot_row = -1
+  for row in range(2, m+2):
+    tableau[row][pivot_column] = round_off(tableau[row][pivot_column])
+    if tableau[row][pivot_column]<=0:
+      continue
+    if tableau[row][0][1]/tableau[row][pivot_column] < minimum or minimum == -1:
+      minimum = tableau[row][0][1]/tableau[row][pivot_column]
+      pivot_row = row
+  auxillary_pivot(tableau, pivot_row, pivot_column, n, m)
+  return
+
+def auxillary_pivot(tableau, pivot_row, pivot_column, n, m):
+  factor = tableau[pivot_row][pivot_column]
+  if pivot_column <= m:
+      tableau[pivot_row][0][0] = -pivot_column
+  else:
+      tableau[pivot_row][0][0] = pivot_column-m
+  tableau[pivot_row][0][1] /= tableau[pivot_row][pivot_column]
+  for column in range(1, n+1):
+    tableau[pivot_row][column] /= factor
+  for row in range(m+2):
+    if row == pivot_row:
+      continue
+    factor = tableau[row][pivot_column]
+    tableau[row][0][1] -= factor* tableau[pivot_row][0][1]
+    for column in range(1, n+1):
+      tableau[row][column] -= factor * tableau[pivot_row][column]
+  return
 
 def primal_simplex(tableau, n, m):
   optimal = False
@@ -133,7 +208,7 @@ def dual_simplex_iteration(tableau, pivot_row, n, m):
   for column in range(1, n+1):
     tableau[pivot_row][column] = round_off(tableau[pivot_row][column])
     if tableau[pivot_row][column] >= 0:
-      continue;
+      continue
     if (tableau[0][column]/abs(tableau[pivot_row][column])) < minimum or minimum == -1:
       minimum = tableau[0][column]/abs(tableau[pivot_row][column])
       pivot_column = column
@@ -161,4 +236,4 @@ def simplex_pivot(tableau, pivot_row, pivot_column, n, m):
 
 # print(dual_simplex(A, 6, 4))
 
-print(gomory("input3.txt"))
+print(gomory("input_test.txt"))
